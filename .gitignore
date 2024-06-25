@@ -30,5 +30,5 @@ coverage
 *.tsbuildinfo
 
 favicon.ico
-main.*
+main.js
 public

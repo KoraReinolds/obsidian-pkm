@@ -41,7 +41,8 @@ export default defineConfig({
     minify: false,
     lib: {
       entry: {
-        main: './src/main.ts'
+        main: './src/main.ts',
+        log: './src/log.ts'
       },
       fileName: (format, entryName) => `${entryName}.js`,
       formats: ['cjs']
