@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-daily-first-pkm",
+  "name": "Daily first pkm",
+  "version": "0.0.1",
+  "minAppVersion": "0.15.0",
+  "description": "Daily first pkm plugin",
+  "author": "Kora",
+  "authorUrl": "https://github.com/KoraReinolds",
+  "isDesktopOnly": false
+}
