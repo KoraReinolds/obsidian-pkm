@@ -1,16 +1,8 @@
-import { App, Plugin } from 'obsidian'
-
-type TPlugins = {
-  'templater-obsidian': any
-}
+import { Plugin } from 'obsidian'
+import type { TExtendedApp } from './types'
 
 export default class PKMPlugin extends Plugin {
-  extendedApp: App &
-    Partial<{
-      plugins: {
-        plugins: TPlugins
-      }
-    }> = this.app
+  extendedApp: TExtendedApp = this.app
 
   async onload() {}
 }
