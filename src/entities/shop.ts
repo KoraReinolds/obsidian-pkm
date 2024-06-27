@@ -5,7 +5,7 @@ export class Shop extends AEntity {
   constructor() {
     super({
       token: `🛒`,
-      logStructure: [ELog.time]
+      logStructure: [ELog.time, ELog.size]
     })
   }
 }

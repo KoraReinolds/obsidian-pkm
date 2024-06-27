@@ -1,9 +1,12 @@
+import { SizeLog } from './size'
 import { TimeLog } from './time'
 
 export enum ELog {
-  time = 'time'
+  time = 'time',
+  size = 'size'
 }
 
 export const LogMap = {
-  [ELog.time]: TimeLog
+  [ELog.time]: TimeLog,
+  [ELog.size]: SizeLog
 }
