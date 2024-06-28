@@ -2,8 +2,6 @@ import type { TFile } from 'obsidian'
 import { ALog } from './model'
 
 export class LinkLog extends ALog<{ file: TFile }> {
-  folderPath: string = 'Food'
-
   async parse(data: string): Promise<{ file: TFile }> {
     const linkRegex = /\[\[(.*?)\]\]/g
     const fileName = data.match(linkRegex)?.[0].slice(2, -2)

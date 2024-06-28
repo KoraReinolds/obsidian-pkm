@@ -5,9 +5,11 @@ import type { TExtendedApp } from '@/types'
 export class AEntity implements IEntity {
   token: string
   logStructure: ELog[]
+  folderPath: string
 
   constructor(params: IEntityParams) {
     this.token = params.token
+    this.folderPath = params.folderPath
     this.logStructure = params.logStructure
   }
 
@@ -19,7 +21,12 @@ export class AEntity implements IEntity {
       this.logStructure.map(
         (name) =>
           new Promise((res) =>
-            res(new LogMap[name](app).display())
+            res(
+              new LogMap[name](
+                app,
+                this.folderPath
+              ).display()
+            )
           )
       )
     )
@@ -34,9 +41,10 @@ export class AEntity implements IEntity {
     return (
       await Promise.all(
         this.logStructure.map((type, index) => {
-          return new LogMap[type](app).parse(
-            (tags && tags[index]) || log
-          )
+          return new LogMap[type](
+            app,
+            this.folderPath
+          ).parse((tags && tags[index]) || log)
         })
       )
     ).reduce(
