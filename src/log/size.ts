@@ -6,6 +6,9 @@ export class SizeLog extends ALog {
   }
 
   async display(): Promise<string> {
-    return await this.prompt('Quantity', this._createSize)
+    return await this.pkm.prompt(
+      'Quantity',
+      this._createSize
+    )
   }
 }

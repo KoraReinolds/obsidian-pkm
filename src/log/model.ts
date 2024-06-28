@@ -1,23 +1,18 @@
+import type PKMPlugin from '@/main'
 import type { TExtendedApp } from '@/types'
+import type { TAbstractFile } from 'obsidian'
 
 export abstract class ALog {
   constructor(app: TExtendedApp) {
-    this.tp = app.plugins?.plugins['templater-obsidian']
+    const pkm =
+      app.plugins?.plugins['obsidian-daily-first-pkm']
+    if (!pkm) throw new Error('Pkm plugin is required')
+
+    this.pkm = pkm
     this.app = app
   }
 
-  tp: any
+  pkm: PKMPlugin
   app: TExtendedApp
   abstract display(): Promise<string>
-
-  async prompt(
-    promptTitle: string,
-    f: (promptValue: string) => string
-  ): Promise<string> {
-    return await f(
-      await this.tp.templater.current_functions_object.system.prompt(
-        promptTitle
-      )
-    )
-  }
 }
