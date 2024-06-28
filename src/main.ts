@@ -24,6 +24,12 @@ export default class PKMPlugin extends Plugin {
     )
   }
 
+  async getFileByPath(path: string): Promise<TFile> {
+    const file = this.app.vault.getAbstractFileByPath(path)
+    if (this.isFile(file)) return file
+    throw new Error('Get folder instead file')
+  }
+
   async suggestFileByPath(path: string): Promise<TFile> {
     const file = this.app.vault.getAbstractFileByPath(path)
     if (this.isFolder(file)) {
@@ -41,6 +47,7 @@ export default class PKMPlugin extends Plugin {
   }
 
   async onload() {
+    console.log(this)
     this.tp =
       this.extendedApp.plugins?.plugins[
         'templater-obsidian'

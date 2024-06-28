@@ -1,6 +1,15 @@
 import { ALog } from './model'
 
-export class TimeLog extends ALog {
+export class TimeLog extends ALog<{
+  hh: number
+  mm: number
+}> {
+  async parse(
+    data: string
+  ): Promise<{ hh: number; mm: number }> {
+    const splitted = data.split('/')
+    return await { hh: +splitted[1], mm: +splitted[2] }
+  }
   async display(): Promise<string> {
     const templateFile =
       this.app.vault.getAbstractFileByPath(

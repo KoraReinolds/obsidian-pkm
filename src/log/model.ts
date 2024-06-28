@@ -1,8 +1,7 @@
 import type PKMPlugin from '@/main'
 import type { TExtendedApp } from '@/types'
-import type { TAbstractFile } from 'obsidian'
 
-export abstract class ALog {
+export abstract class ALog<T> {
   constructor(app: TExtendedApp) {
     const pkm =
       app.plugins?.plugins['obsidian-daily-first-pkm']
@@ -15,4 +14,5 @@ export abstract class ALog {
   pkm: PKMPlugin
   app: TExtendedApp
   abstract display(): Promise<string>
+  abstract parse(data: string): Promise<T>
 }

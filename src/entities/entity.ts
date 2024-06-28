@@ -23,6 +23,28 @@ export class AEntity implements IEntity {
           )
       )
     )
-    return `${'>'.repeat(n * 2)} (log:: ${this.token}${values.join(' ')})`
+    const log = `${'>'.repeat(n * 2)} (log:: ${this.token}${values.join(' ')})`
+    return log
+  }
+
+  async parse(app: TExtendedApp, log: string) {
+    const tagRegex = /#[^\s#]+/g
+    const tags = log.match(tagRegex)
+
+    return (
+      await Promise.all(
+        this.logStructure.map((type, index) => {
+          return new LogMap[type](app).parse(
+            (tags && tags[index]) || log
+          )
+        })
+      )
+    ).reduce(
+      (res, cur) => ({
+        ...res,
+        ...cur
+      }),
+      {}
+    )
   }
 }
