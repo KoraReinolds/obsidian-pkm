@@ -30,8 +30,15 @@ export default class PKMPlugin extends Plugin {
     throw new Error('Get folder instead file')
   }
 
+  async getFolderByPath(path: string): Promise<TFolder> {
+    const folder =
+      this.app.vault.getAbstractFileByPath(path)
+    if (this.isFolder(folder)) return folder
+    throw new Error('Get file instead folder')
+  }
+
   async suggestFileByPath(path: string): Promise<TFile> {
-    const file = this.app.vault.getAbstractFileByPath(path)
+    const file = await this.getFolderByPath(path)
     if (this.isFolder(file)) {
       const files = file.children.filter((f) =>
         this.isFile(f)
@@ -46,8 +53,22 @@ export default class PKMPlugin extends Plugin {
     }
   }
 
+  async openFileByBaseName(path: string) {
+    const file = await this.getFileByPath(`${path}.md`)
+    if (file) {
+      const workspace = this.app.workspace
+      const currentLeaf = workspace.activeLeaf
+      if (currentLeaf) {
+        await currentLeaf.openFile(file)
+      } else {
+        throw new Error('No active pane found')
+      }
+    } else {
+      throw new Error(`File "${path}" not found`)
+    }
+  }
+
   async onload() {
-    console.log(this)
     this.tp =
       this.extendedApp.plugins?.plugins[
         'templater-obsidian'
