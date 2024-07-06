@@ -1,9 +1,30 @@
 import { Plugin, TFile, TFolder } from 'obsidian'
 import type { TExtendedApp } from './types'
+import { Shop } from './entities/shop'
+import type { IEntity } from './entities/types'
+import { ELog } from './log/types'
+import { TimeLog } from './log/time'
+import { SizeLog } from './log/size'
+import { LinkLog } from './log/link'
 
 export default class PKMPlugin extends Plugin {
   extendedApp: TExtendedApp = this.app
   tp: any
+  dv: any
+
+  LogMap = {
+    [ELog.time]: new TimeLog(this.extendedApp),
+    [ELog.size]: new SizeLog(this.extendedApp),
+    [ELog.link]: new LinkLog(this.extendedApp)
+  }
+
+  tokenToClass: Record<string, IEntity> = {
+    [`🛒`]: new Shop(this.extendedApp)
+  }
+
+  modules: Record<string, IEntity> = {
+    shop: new Shop(this.extendedApp)
+  }
 
   isFile(file: any): file is TFile {
     return file instanceof TFile
@@ -22,6 +43,13 @@ export default class PKMPlugin extends Plugin {
         promptTitle
       )
     )
+  }
+
+  async getActiveFile(): Promise<TFile> {
+    const activeFile = this.app.workspace.getActiveFile()
+    if (!activeFile)
+      throw new Error('Active file not found')
+    return activeFile
   }
 
   async getFileByPath(path: string): Promise<TFile> {
@@ -69,6 +97,7 @@ export default class PKMPlugin extends Plugin {
   }
 
   async onload() {
+    this.dv = this.extendedApp.plugins?.plugins.dataview.api
     this.tp =
       this.extendedApp.plugins?.plugins[
         'templater-obsidian'

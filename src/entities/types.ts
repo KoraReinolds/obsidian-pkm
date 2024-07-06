@@ -1,11 +1,11 @@
 import type { ELog } from '@/log/types'
-import type { TExtendedApp } from '@/types'
 
 export interface IEntity {
   token: string
   folderPath: string
-  logStructure: ELog[]
-  log(app: TExtendedApp): Promise<string>
+  logStructure: Record<string, ELog>
+  log(n?: number, folderPath?: string): Promise<string>
+  parse(log: string, folderPath?: string): Promise<any>
 }
 
 export interface IEntityParams {

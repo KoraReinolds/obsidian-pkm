@@ -1,32 +1,33 @@
-import type { IEntity, IEntityParams } from './types'
-import { LogMap, type ELog } from '@/log/types'
+import type { IEntity } from './types'
+import { ELog } from '@/log/types'
+import PKMPlugin from '@/main'
 import type { TExtendedApp } from '@/types'
 
-export class AEntity implements IEntity {
-  token: string
-  logStructure: ELog[]
-  folderPath: string
+export abstract class AEntity implements IEntity {
+  abstract token: string
+  abstract logStructure: Record<string, ELog>
+  abstract folderPath: string
+  app: TExtendedApp
+  public get pkm(): PKMPlugin {
+    const pkm =
+      this.app.plugins?.plugins['obsidian-daily-first-pkm']
+    if (!pkm) throw new Error('Pkm plugin is required')
+    return pkm
+  }
 
-  constructor(params: IEntityParams) {
-    this.token = params.token
-    this.folderPath = params.folderPath
-    this.logStructure = params.logStructure
+  constructor(app: TExtendedApp) {
+    this.app = app
   }
 
   async log(
-    app: TExtendedApp,
-    n: number = 1
+    n: number = 1,
+    folderPath?: string
   ): Promise<string> {
     const values = await Promise.all(
-      this.logStructure.map(
-        (name) =>
+      Object.values(this.logStructure).map(
+        (type) =>
           new Promise((res) =>
-            res(
-              new LogMap[name](
-                app,
-                this.folderPath
-              ).display()
-            )
+            res(this.pkm.LogMap[type].display(folderPath))
           )
       )
     )
@@ -34,25 +35,21 @@ export class AEntity implements IEntity {
     return log
   }
 
-  async parse(app: TExtendedApp, log: string) {
-    const tagRegex = /#[^\s#]+/g
-    const tags = log.match(tagRegex)
-
-    return (
+  async parse(log: string, folderPath?: string) {
+    return Object.fromEntries(
       await Promise.all(
-        this.logStructure.map((type, index) => {
-          return new LogMap[type](
-            app,
-            this.folderPath
-          ).parse((tags && tags[index]) || log)
-        })
+        Object.entries(this.logStructure).map(
+          async ([key, type]) => {
+            return [
+              key,
+              await this.pkm.LogMap[type].parse(
+                log,
+                folderPath
+              )
+            ]
+          }
+        )
       )
-    ).reduce(
-      (res, cur) => ({
-        ...res,
-        ...cur
-      }),
-      {}
     )
   }
 }

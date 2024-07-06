@@ -1,21 +1,22 @@
 import type PKMPlugin from '@/main'
 import type { TExtendedApp } from '@/types'
 
-export abstract class ALog<T> {
-  folderPath: string
-
-  constructor(app: TExtendedApp, folderPath: string) {
+export abstract class ALog {
+  app: TExtendedApp
+  public get pkm(): PKMPlugin {
     const pkm =
-      app.plugins?.plugins['obsidian-daily-first-pkm']
+      this.app.plugins?.plugins['obsidian-daily-first-pkm']
     if (!pkm) throw new Error('Pkm plugin is required')
-
-    this.pkm = pkm
-    this.app = app
-    this.folderPath = folderPath
+    return pkm
   }
 
-  pkm: PKMPlugin
-  app: TExtendedApp
-  abstract display(): Promise<string>
-  abstract parse(data: string): Promise<T>
+  constructor(app: TExtendedApp) {
+    this.app = app
+  }
+
+  abstract display(folderPath?: string): Promise<string>
+  abstract parse(
+    data: string,
+    folderPath?: string
+  ): Promise<any>
 }

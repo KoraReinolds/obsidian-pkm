@@ -1,8 +1,15 @@
 import { ALog } from './model'
 
-export class SizeLog extends ALog<{ size: number }> {
-  async parse(data: string): Promise<{ size: number }> {
-    return await { size: +data.split('/')[1] }
+export class SizeLog extends ALog {
+  async parse(data: string): Promise<number> {
+    const sizeRegex = /#size\/(\d+)/
+
+    const sizeMatch = data.match(sizeRegex)
+    if (sizeMatch) {
+      return parseInt(sizeMatch[1])
+    }
+
+    throw new Error("Can't parse size at " + data)
   }
 
   _createSize(n: string) {
