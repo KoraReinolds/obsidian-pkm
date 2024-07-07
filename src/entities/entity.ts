@@ -19,6 +19,17 @@ export abstract class AEntity implements IEntity {
     this.app = app
   }
 
+  logWithParams(params: any[], n: number = 1): string {
+    const values = Object.values(this.logStructure).map(
+      (type, index) => {
+        const d = params[index] as never
+        return this.pkm.LogMap[type].displayWithParams(d)
+      }
+    )
+    const log = `${'>'.repeat(n * 2)} (log:: ${this.token}${values.join(' ')})`
+    return log
+  }
+
   async log(
     n: number = 1,
     folderPath?: string
@@ -50,6 +61,17 @@ export abstract class AEntity implements IEntity {
           }
         )
       )
+    )
+  }
+
+  async parseLogs(logs: string[], folderPath?: string) {
+    return await Promise.all(
+      logs
+        .filter((log) => {
+          const token = log.slice(0, log.indexOf(' '))
+          return token === this.token
+        })
+        .map((log) => this.parse(log, folderPath))
     )
   }
 }

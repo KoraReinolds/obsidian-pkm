@@ -13,6 +13,10 @@ export class TimeLog extends ALog {
     throw new Error("Can't parse time at " + data)
   }
 
+  displayWithParams(params: TTimeLog): string {
+    return `#time/${params.hh}/${params.mm}`
+  }
+
   async display(): Promise<string> {
     const templateFile =
       this.app.vault.getAbstractFileByPath(

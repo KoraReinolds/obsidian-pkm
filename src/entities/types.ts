@@ -5,7 +5,9 @@ export interface IEntity {
   folderPath: string
   logStructure: Record<string, ELog>
   log(n?: number, folderPath?: string): Promise<string>
+  logWithParams(params: any[], n?: number): string
   parse(log: string, folderPath?: string): Promise<any>
+  parseLogs(log: string[]): Promise<any[]>
 }
 
 export interface IEntityParams {

@@ -18,13 +18,9 @@ export type TTimeLog = {
   mm: number
 }
 
-export type TSizeLog = {
-  size: number
-}
+export type TSizeLog = number
 
-export type TLinkLog = {
-  file: TFile
-}
+export type TLinkLog = TFile
 
 export enum ELog {
   time = 'time',

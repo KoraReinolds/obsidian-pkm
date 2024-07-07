@@ -12,7 +12,11 @@ export class SizeLog extends ALog {
     throw new Error("Can't parse size at " + data)
   }
 
-  _createSize(n: string) {
+  displayWithParams(params: number): string {
+    return this._createSize(params)
+  }
+
+  _createSize(n: string | number) {
     return `#size/${n}`
   }
 

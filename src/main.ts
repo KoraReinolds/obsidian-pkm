@@ -6,11 +6,15 @@ import { ELog } from './log/types'
 import { TimeLog } from './log/time'
 import { SizeLog } from './log/size'
 import { LinkLog } from './log/link'
+import { Product } from './entities/product'
 
 export default class PKMPlugin extends Plugin {
   extendedApp: TExtendedApp = this.app
   tp: any
   dv: any
+
+  shop = new Shop(this.extendedApp)
+  product = new Product(this.extendedApp)
 
   LogMap = {
     [ELog.time]: new TimeLog(this.extendedApp),
@@ -19,11 +23,8 @@ export default class PKMPlugin extends Plugin {
   }
 
   tokenToClass: Record<string, IEntity> = {
-    [`🛒`]: new Shop(this.extendedApp)
-  }
-
-  modules: Record<string, IEntity> = {
-    shop: new Shop(this.extendedApp)
+    [`🛒`]: this.shop,
+    [`🍔`]: this.product
   }
 
   isFile(file: any): file is TFile {

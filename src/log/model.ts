@@ -15,6 +15,7 @@ export abstract class ALog {
   }
 
   abstract display(folderPath?: string): Promise<string>
+  abstract displayWithParams(params: any): string
   abstract parse(
     data: string,
     folderPath?: string

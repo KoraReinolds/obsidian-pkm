@@ -21,6 +21,11 @@ export class LinkLog extends ALog {
 
     throw new Error("Can't parse link at " + data)
   }
+
+  displayWithParams(params: string): string {
+    return `[[${params}]]`
+  }
+
   async display(folderPath?: string): Promise<string> {
     if (!folderPath)
       throw new Error(
