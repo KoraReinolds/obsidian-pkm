@@ -27,6 +27,47 @@ export default class PKMPlugin extends Plugin {
     [`🍔`]: this.product
   }
 
+  async getMetadataKey(key: string, file?: TFile) {
+    const metaeditApi =
+      this.extendedApp.plugins?.plugins['metaedit'].api
+    if (!metaeditApi) return
+    const { getPropertyValue } = metaeditApi
+
+    const activeFile = file || (await this.getActiveFile())
+    return getPropertyValue(key, activeFile)
+  }
+
+  async cretateMetadataKey(
+    key: string,
+    value: string,
+    file?: TFile
+  ) {
+    const metaeditApi =
+      this.extendedApp.plugins?.plugins['metaedit'].api
+    if (!metaeditApi) return
+    const { createYamlProperty } = metaeditApi
+
+    const activeFile = file || (await this.getActiveFile())
+    return createYamlProperty(key, value, activeFile.path)
+  }
+
+  async updateMetadata(
+    key: string,
+    value: string,
+    file?: TFile
+  ) {
+    const metaeditApi =
+      this.extendedApp.plugins?.plugins['metaedit'].api
+    if (!metaeditApi) return
+    const { update } = metaeditApi
+    const activeFile = file || (await this.getActiveFile())
+    if (await this.getMetadataKey(key, activeFile)) {
+      update(key, value, activeFile.path)
+    } else {
+      await this.cretateMetadataKey(key, value, activeFile)
+    }
+  }
+
   isFile(file: any): file is TFile {
     return file instanceof TFile
   }

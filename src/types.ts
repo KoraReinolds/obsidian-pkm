@@ -4,6 +4,7 @@ import type PKMPlugin from './main'
 export type TPlugins = {
   'templater-obsidian': any
   'obsidian-daily-first-pkm': PKMPlugin
+  metaedit: { api: any }
   dataview: any
 }
 
