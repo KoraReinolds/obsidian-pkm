@@ -70,15 +70,15 @@ export default async () => {
       return
     }
     const fileContent = `---
-  aliases: []
-  date created: Tuesday, April 16th 2024, 8:26:32 pm
-  date modified: Sunday, June 2nd 2024, 9:28:34 pm
-  pfc_carbohydrates: ${product.carbohydrates}
-  pfc_fats: ${product.fats}
-  pfc_proteins: ${product.proteins}
-  portion_size: 1
-  tags: []
-  ---`
+aliases: []
+date created: Tuesday, April 16th 2024, 8:26:32 pm
+date modified: Sunday, June 2nd 2024, 9:28:34 pm
+pfc_carbohydrates: ${product.carbohydrates}
+pfc_fats: ${product.fats}
+pfc_proteins: ${product.proteins}
+portion_size: 1
+tags: []
+---`
     await app.vault.create(fileName, fileContent)
   }
 }

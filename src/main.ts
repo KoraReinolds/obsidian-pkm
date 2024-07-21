@@ -1,20 +1,153 @@
-import { Plugin, TFile, TFolder } from 'obsidian'
+import {
+  Editor,
+  Plugin,
+  TFile,
+  TFolder,
+  type CachedMetadata
+} from 'obsidian'
 import type { TExtendedApp } from './types'
-import { Shop } from './entities/shop'
+import { Shop, ShopAdd, ShopCancel } from './entities/shop'
 import type { IEntity } from './entities/types'
-import { ELog } from './log/types'
+import { ELog, type TTimeLog } from './log/types'
 import { TimeLog } from './log/time'
 import { SizeLog } from './log/size'
 import { LinkLog } from './log/link'
 import { Product } from './entities/product'
+import weeklyNote from './notes/weekly'
 
 export default class PKMPlugin extends Plugin {
   extendedApp: TExtendedApp = this.app
   tp: any
   dv: any
+  tpm: any
 
-  shop = new Shop(this.extendedApp)
-  product = new Product(this.extendedApp)
+  shop = {
+    instance: new Shop(this.extendedApp),
+    getSizesFromLogs: async (
+      entity: IEntity,
+      logs: string[]
+    ) => {
+      const logData = await entity.parseLogs(logs)
+
+      const sizes: Record<string, number> = {}
+      logData.reduce((res, data) => {
+        const fileName = data.link.basename
+        const size = data.size
+        res[fileName]
+          ? (res[fileName] += +size)
+          : (res[fileName] = +size)
+        return res
+      }, sizes)
+
+      return sizes
+    }
+  }
+
+  shopRemove = {
+    instance: new ShopCancel(this.extendedApp)
+  }
+
+  shopAdd = {
+    instance: new ShopAdd(this.extendedApp)
+  }
+
+  product = {
+    instance: new Product(this.extendedApp)
+  }
+
+  notes = {
+    weekly: weeklyNote
+  }
+
+  date = {
+    getCurrentTime(): TTimeLog {
+      const now = new Date()
+      const hh = +now.getHours().toString().padStart(2, '0')
+      const mm = +now
+        .getMinutes()
+        .toString()
+        .padStart(2, '0')
+
+      return { hh, mm }
+    },
+    dayFormatFromWeek: (tp: any, date: string) => {
+      return tp.date.now(
+        'YYYY-MM-DD',
+        0,
+        date,
+        'YYYY-[W]ww'
+      )
+    },
+    weekFormatFromDay: (tp: any, date: string) => {
+      return tp.date.now(
+        'YYYY-[W]ww',
+        0,
+        date,
+        'YYYY-MM-DD'
+      )
+    },
+    getWeekData: async (app: TExtendedApp) => {
+      const pkm =
+        app.plugins?.plugins['obsidian-daily-first-pkm']
+      if (!pkm) throw new Error('Pkm plugin is required')
+      const tp = pkm.tp.templater.current_functions_object
+      const activeFile = await pkm.getActiveFile()
+      const date = activeFile.basename
+
+      return await new Promise((res, rej) => {
+        try {
+          const fileWeekDate = this.date.dayFormatFromWeek(
+            tp,
+            date
+          )
+          const moment = tp.date.now('YYYY-MM-DD')
+          const offset =
+            (+new Date(fileWeekDate) - +new Date(moment)) /
+            1000 /
+            24 /
+            60 /
+            60
+
+          const currentWeekDate = tp.date.now(
+            'YYYY-[W]ww',
+            offset
+          )
+          const prevWeekDate = tp.date.now(
+            'YYYY-[W]ww',
+            -7 + offset
+          )
+          const nextWeekDate = tp.date.now(
+            'YYYY-[W]ww',
+            7 + offset
+          )
+          const monthStart = tp.date.now('YYYY-MM', offset)
+
+          res({
+            offset,
+            currentWeekDate,
+            fileWeekDate,
+            moment,
+            prevWeekDate,
+            nextWeekDate,
+            monthStart
+          })
+        } catch {
+          rej('Data format error')
+        }
+      })
+    }
+  }
+
+  getInstance(type: string): IEntity {
+    if (type === 'shop') return this.shop.instance
+    else if (type === 'shop-remove')
+      return this.shopRemove.instance
+    else if (type === 'shop-add')
+      return this.shopAdd.instance
+    else if (type === 'product')
+      return this.product.instance
+    throw new Error('Unexpected entity type')
+  }
 
   LogMap = {
     [ELog.time]: new TimeLog(this.extendedApp),
@@ -23,8 +156,16 @@ export default class PKMPlugin extends Plugin {
   }
 
   tokenToClass: Record<string, IEntity> = {
-    [`🛒`]: this.shop,
-    [`🍔`]: this.product
+    [`🛒`]: this.shop.instance,
+    [`🛒❌`]: this.shopRemove.instance,
+    [`🛒✅`]: this.shopAdd.instance,
+    [`🍔`]: this.product.instance
+  }
+
+  getNow(): string {
+    return this.tpm.date.now(
+      'dddd, MMMM Do YYYY, h:mm:ss a'
+    )
   }
 
   async getMetadataKey(key: string, file?: TFile) {
@@ -95,7 +236,9 @@ export default class PKMPlugin extends Plugin {
   }
 
   async getFileByPath(path: string): Promise<TFile> {
-    const file = this.app.vault.getAbstractFileByPath(path)
+    const file = this.app.vault.getAbstractFileByPath(
+      this.getFileName(path)
+    )
     if (this.isFile(file)) return file
     throw new Error('Get folder instead file')
   }
@@ -123,8 +266,60 @@ export default class PKMPlugin extends Plugin {
     }
   }
 
+  getBoudariesOfBlock(data: {
+    editor: Editor
+    cache: CachedMetadata
+    name: string
+  }) {
+    const doc = data.editor.getDoc()
+    const section = data.cache.sections?.find((section) => {
+      const line = section.position.start.line
+      return doc
+        .getLine(line)
+        .toLowerCase()
+        .endsWith(data.name)
+    })
+
+    return section?.position
+  }
+
+  getCache(file: TFile) {
+    return this.app.metadataCache.getFileCache(file)
+  }
+
+  getFileName(path: string) {
+    return path.endsWith('.md') ? path : `${path}.md`
+  }
+
+  async createNewLeaf(path: string) {
+    // Create a new leaf in a new split direction (e.g., right split)
+    const leaf = this.app.workspace.getLeaf('tab')
+
+    const file = await this.getFileByPath(path)
+
+    if (file && leaf) {
+      await leaf.openFile(file)
+    }
+  }
+
+  getEditorForFile(file: TFile) {
+    const leaves =
+      this.app.workspace.getLeavesOfType('markdown')
+
+    for (const leaf of leaves) {
+      const view = leaf.view
+
+      if (view.file.path === file.path) {
+        const editor = view.editor
+        return editor
+      }
+    }
+
+    return null
+  }
+
   async openFileByBaseName(path: string) {
-    const file = await this.getFileByPath(`${path}.md`)
+    const file = await this.getFileName(path)
     if (file) {
       const workspace = this.app.workspace
       const currentLeaf = workspace.activeLeaf
@@ -144,5 +339,6 @@ export default class PKMPlugin extends Plugin {
       this.extendedApp.plugins?.plugins[
         'templater-obsidian'
       ]
+    this.tpm = this.tp.templater.current_functions_object
   }
 }

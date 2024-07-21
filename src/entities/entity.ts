@@ -26,7 +26,7 @@ export abstract class AEntity implements IEntity {
         return this.pkm.LogMap[type].displayWithParams(d)
       }
     )
-    const log = `${'>'.repeat(n * 2)} (log:: ${this.token}${values.join(' ')})`
+    const log = `${'>'.repeat(n * 2)} (log:: ${this.token} ${values.join(' ')})\n`
     return log
   }
 
@@ -42,7 +42,7 @@ export abstract class AEntity implements IEntity {
           )
       )
     )
-    const log = `${'>'.repeat(n * 2)} (log:: ${this.token}${values.join(' ')})`
+    const log = `${'>'.repeat(n * 2)} (log:: ${this.token} ${values.join(' ')})\n`
     return log
   }
 
@@ -64,14 +64,18 @@ export abstract class AEntity implements IEntity {
     )
   }
 
+  filterLogs(logs: string[]): string[] {
+    return logs.filter((log) => {
+      const token = log.slice(0, log.indexOf(' '))
+      return token === this.token
+    })
+  }
+
   async parseLogs(logs: string[], folderPath?: string) {
     return await Promise.all(
-      logs
-        .filter((log) => {
-          const token = log.slice(0, log.indexOf(' '))
-          return token === this.token
-        })
-        .map((log) => this.parse(log, folderPath))
+      this.filterLogs(logs).map((log) =>
+        this.parse(log, folderPath)
+      )
     )
   }
 }

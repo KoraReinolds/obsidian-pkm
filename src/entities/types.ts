@@ -8,6 +8,7 @@ export interface IEntity {
   logWithParams(params: any[], n?: number): string
   parse(log: string, folderPath?: string): Promise<any>
   parseLogs(log: string[]): Promise<any[]>
+  filterLogs(logs: string[]): string[]
 }
 
 export interface IEntityParams {

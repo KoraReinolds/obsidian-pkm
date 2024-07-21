@@ -32,4 +32,18 @@ export class Shop extends AEntity {
   async parseLogs(logs: string[]): Promise<TShopData[]> {
     return await super.parseLogs(logs, this.folderPath)
   }
+
+  logWithParams(
+    params: [TTimeLog, number, string]
+  ): string {
+    return super.logWithParams(params)
+  }
+}
+
+export class ShopCancel extends Shop {
+  token = `🛒❌`
+}
+
+export class ShopAdd extends Shop {
+  token = `🛒✅`
 }

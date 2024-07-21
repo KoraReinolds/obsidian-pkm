@@ -43,6 +43,7 @@ export default defineConfig({
       entry: {
         main: './src/main.ts',
         log: './src/log.ts',
+        weeklyNote: './src/weeklyNote.ts',
         createProducts: './src/createProducts.ts'
       },
       fileName: (format, entryName) => `${entryName}.js`,
@@ -65,6 +66,6 @@ export default defineConfig({
       ]
     },
     outDir: './public',
-    target: 'es2015'
+    target: 'esnext'
   }
 })
