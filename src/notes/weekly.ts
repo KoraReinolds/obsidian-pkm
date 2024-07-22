@@ -31,7 +31,7 @@ const weeklyNote = async (app: TExtendedApp, dv: any) => {
     pkm.date.weekFormatFromDay(tp, data.file.name) <
     nextWeekDate
 
-  const addedSizes = await pkm.shop.getSizesFromLogs(
+  const buySizes = await pkm.shop.getSizesFromLogs(
     pkm.shop.instance,
     await dv
       .pages('"Journal/Daily"')
@@ -42,16 +42,26 @@ const weeklyNote = async (app: TExtendedApp, dv: any) => {
     pkm.shopRemove.instance,
     await dv
       .pages('"Journal/Daily"')
-      .where(currentWeekWhere).log
+      .where(beforeCurrentWeekWhere).log
+  )
+
+  const addedSizes = await pkm.shop.getSizesFromLogs(
+    pkm.shopAdd.instance,
+    await dv
+      .pages('"Journal/Daily"')
+      .where(beforeCurrentWeekWhere).log
   )
 
   const rows: any[] = []
   const msgs: string[] = []
 
-  Object.entries(addedSizes)
+  Object.entries(buySizes)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([name, addedSize]) => {
-      const size = addedSize - (removedSizes[name] || 0)
+      const size =
+        addedSize -
+        (removedSizes[name] || 0) -
+        (addedSizes[name] || 0)
       const button = dv.el('button', 'log')
       const buttonAdd = dv.el('button', 'add')
       const buttonRemove = dv.el('button', 'remove')
