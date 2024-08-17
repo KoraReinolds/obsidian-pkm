@@ -1,12 +1,13 @@
 import type { TFile } from 'obsidian'
 import { ALog } from './model'
+import type { AEntity } from '@/entities/entity'
 
 export class LinkLog extends ALog {
   async parse(
-    data: string,
-    folderPath?: string
+    entity: AEntity,
+    data: string
   ): Promise<TFile> {
-    if (!folderPath)
+    if (!entity.folderPath)
       throw new Error(
         'FolderPath not provided for display link'
       )
@@ -15,7 +16,7 @@ export class LinkLog extends ALog {
     const linkMatch = data.match(linkRegex)
     if (linkMatch) {
       return await this.pkm.getFileByPath(
-        `${folderPath}/${fileName}.md`
+        `${entity.folderPath}/${fileName}.md`
       )
     }
 
@@ -26,11 +27,11 @@ export class LinkLog extends ALog {
     return `[[${params}]]`
   }
 
-  async display(folderPath?: string): Promise<string> {
-    if (!folderPath)
+  async display(entity: AEntity): Promise<string> {
+    if (!entity.folderPath)
       throw new Error(
         'FolderPath not provided for display link'
       )
-    return `[[${(await this.pkm.suggestFileByPath(folderPath)).basename}]]`
+    return `[[${(await this.pkm.suggestFileByPath(entity.folderPath)).basename}]]`
   }
 }

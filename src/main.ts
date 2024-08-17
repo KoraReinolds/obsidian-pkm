@@ -14,6 +14,40 @@ import { SizeLog } from './log/size'
 import { LinkLog } from './log/link'
 import { Product } from './entities/product'
 import weeklyNote from './notes/weekly'
+import { taskNote } from './notes/task'
+import { Work } from './entities/work'
+import { StatusLog } from './log/status'
+
+const patternNames: [string, string, number][] = [
+  ['Абстрактная фабрика', 'Abstract factory', 1],
+  ['Адаптер', 'Adapter', 2],
+  ['Декоратор', 'Decorator', 2],
+  ['Заместитель', 'Proxy', 2],
+  ['Итератор', 'Iterator', 3],
+  ['Команда', 'Command', 3],
+  ['Компановщик', 'Compositor', 2],
+  ['Легковес', 'Flyweight', 2],
+  ['Мост', 'Bridge', 2],
+  ['Наблюдатель', 'Watcher', 3],
+  ['Одиночка', 'Singleton', 1],
+  ['Посетитель', 'Visitor', 3],
+  ['Посредник', 'Mediator', 3],
+  ['Прототип', 'Prototype', 1],
+  ['Снимок', 'Memento', 3],
+  ['Состояние', 'State', 3],
+  ['Стратегия', 'Strategy', 3],
+  ['Строитель', 'Builder', 1],
+  ['Фабричный метод', 'Factory method', 1],
+  ['Фасад', 'Facade', 2],
+  ['Цепочка обязанностей', 'Chain of responsibility', 3],
+  ['Шаблонный метод', 'Template method', 3]
+]
+
+const patternTypes = [
+  'Порождающий',
+  'Структурный',
+  'Поведенческий'
+]
 
 export default class PKMPlugin extends Plugin {
   extendedApp: TExtendedApp = this.app
@@ -55,8 +89,13 @@ export default class PKMPlugin extends Plugin {
     instance: new Product(this.extendedApp)
   }
 
+  work = {
+    instance: new Work(this.extendedApp)
+  }
+
   notes = {
-    weekly: weeklyNote
+    weekly: weeklyNote,
+    task: taskNote
   }
 
   date = {
@@ -70,6 +109,7 @@ export default class PKMPlugin extends Plugin {
 
       return { hh, mm }
     },
+
     dayFormatFromWeek: (tp: any, date: string) => {
       return tp.date.now(
         'YYYY-MM-DD',
@@ -78,6 +118,7 @@ export default class PKMPlugin extends Plugin {
         'YYYY-[W]ww'
       )
     },
+
     weekFormatFromDay: (tp: any, date: string) => {
       return tp.date.now(
         'YYYY-[W]ww',
@@ -86,6 +127,7 @@ export default class PKMPlugin extends Plugin {
         'YYYY-MM-DD'
       )
     },
+
     getWeekData: async (app: TExtendedApp) => {
       const pkm =
         app.plugins?.plugins['obsidian-daily-first-pkm']
@@ -140,6 +182,7 @@ export default class PKMPlugin extends Plugin {
 
   getInstance(type: string): IEntity {
     if (type === 'shop') return this.shop.instance
+    else if (type === 'work') return this.work.instance
     else if (type === 'shop-remove')
       return this.shopRemove.instance
     else if (type === 'shop-add')
@@ -151,15 +194,19 @@ export default class PKMPlugin extends Plugin {
 
   LogMap = {
     [ELog.time]: new TimeLog(this.extendedApp),
+    [ELog.time_start]: new TimeLog(this.extendedApp),
+    [ELog.time_end]: new TimeLog(this.extendedApp),
     [ELog.size]: new SizeLog(this.extendedApp),
-    [ELog.link]: new LinkLog(this.extendedApp)
+    [ELog.link]: new LinkLog(this.extendedApp),
+    [ELog.status]: new StatusLog(this.extendedApp)
   }
 
   tokenToClass: Record<string, IEntity> = {
     [`🛒`]: this.shop.instance,
     [`🛒❌`]: this.shopRemove.instance,
     [`🛒✅`]: this.shopAdd.instance,
-    [`🍔`]: this.product.instance
+    [`🍔`]: this.product.instance,
+    [`⚡`]: this.work.instance
   }
 
   getNow(): string {

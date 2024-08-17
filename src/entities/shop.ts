@@ -5,6 +5,7 @@ import {
   type TTimeLog
 } from '@/log/types'
 import { AEntity } from './entity'
+import type { ALog } from '@/log/model'
 
 export type TShopData = {
   [ELog.time]: TTimeLog
@@ -13,6 +14,7 @@ export type TShopData = {
 }
 
 export class Shop extends AEntity {
+  logData: Map<ELog, string> = new Map()
   token = `🛒`
   logStructure = {
     time: ELog.time,
@@ -22,15 +24,21 @@ export class Shop extends AEntity {
   folderPath = 'Food'
 
   async log(): Promise<string> {
-    return super.log(1, this.folderPath)
+    return super.log(this, 1)
   }
 
-  async parse(log: string): Promise<TShopData> {
-    return await super.parse(log, this.folderPath)
+  async parse(
+    entity: AEntity,
+    log: string
+  ): Promise<TShopData> {
+    return await super.parse(entity, log)
   }
 
-  async parseLogs(logs: string[]): Promise<TShopData[]> {
-    return await super.parseLogs(logs, this.folderPath)
+  async parseLogs(
+    entity: AEntity,
+    logs: string[]
+  ): Promise<TShopData[]> {
+    return await super.parseLogs(entity, logs)
   }
 
   logWithParams(

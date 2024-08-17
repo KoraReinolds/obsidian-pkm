@@ -22,8 +22,18 @@ export type TSizeLog = number
 
 export type TLinkLog = TFile
 
+export type TStatusLog =
+  | 'todo'
+  | 'planning'
+  | 'progress'
+  | 'review'
+  | 'done'
+
 export enum ELog {
   time = 'time',
+  status = 'status',
   size = 'size',
-  link = 'link'
+  link = 'link',
+  time_start = 'time_start',
+  time_end = 'time_end'
 }

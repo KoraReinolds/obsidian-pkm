@@ -1,13 +1,15 @@
 import type { ELog } from '@/log/types'
+import type { AEntity } from './entity'
 
 export interface IEntity {
   token: string
   folderPath: string
   logStructure: Record<string, ELog>
-  log(n?: number, folderPath?: string): Promise<string>
+  logData: Map<ELog, string>
+  log(entity: AEntity, n?: number): Promise<string>
   logWithParams(params: any[], n?: number): string
-  parse(log: string, folderPath?: string): Promise<any>
-  parseLogs(log: string[]): Promise<any[]>
+  parse(entity: AEntity, log: string): Promise<any>
+  parseLogs(entity: AEntity, log: string[]): Promise<any[]>
   filterLogs(logs: string[]): string[]
 }
 

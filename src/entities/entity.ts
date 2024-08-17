@@ -6,6 +6,7 @@ import type { TExtendedApp } from '@/types'
 export abstract class AEntity implements IEntity {
   abstract token: string
   abstract logStructure: Record<string, ELog>
+  abstract logData: Map<ELog, string>
   abstract folderPath: string
   app: TExtendedApp
   public get pkm(): PKMPlugin {
@@ -31,32 +32,30 @@ export abstract class AEntity implements IEntity {
   }
 
   async log(
-    n: number = 1,
-    folderPath?: string
+    entity: AEntity,
+    n: number = 1
   ): Promise<string> {
-    const values = await Promise.all(
-      Object.values(this.logStructure).map(
-        (type) =>
-          new Promise((res) =>
-            res(this.pkm.LogMap[type].display(folderPath))
-          )
-      )
-    )
+    const values = []
+    for await (const type of Object.values(
+      this.logStructure
+    )) {
+      const data =
+        await this.pkm.LogMap[type].display(entity)
+      values.push(data)
+      this.logData.set(type, data)
+    }
     const log = `${'>'.repeat(n * 2)} (log:: ${this.token} ${values.join(' ')})\n`
     return log
   }
 
-  async parse(log: string, folderPath?: string) {
+  async parse(entity: AEntity, log: string) {
     return Object.fromEntries(
       await Promise.all(
         Object.entries(this.logStructure).map(
           async ([key, type]) => {
             return [
               key,
-              await this.pkm.LogMap[type].parse(
-                log,
-                folderPath
-              )
+              await this.pkm.LogMap[type].parse(entity, log)
             ]
           }
         )
@@ -71,10 +70,10 @@ export abstract class AEntity implements IEntity {
     })
   }
 
-  async parseLogs(logs: string[], folderPath?: string) {
+  async parseLogs(entity: AEntity, logs: string[]) {
     return await Promise.all(
       this.filterLogs(logs).map((log) =>
-        this.parse(log, folderPath)
+        this.parse(entity, log)
       )
     )
   }

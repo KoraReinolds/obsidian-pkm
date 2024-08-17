@@ -1,3 +1,4 @@
+import type { AEntity } from '@/entities/entity'
 import type PKMPlugin from '@/main'
 import type { TExtendedApp } from '@/types'
 
@@ -14,10 +15,10 @@ export abstract class ALog {
     this.app = app
   }
 
-  abstract display(folderPath?: string): Promise<string>
+  abstract display(entity: AEntity): Promise<string>
   abstract displayWithParams(params: any): string
   abstract parse(
-    data: string,
-    folderPath?: string
+    entity: AEntity,
+    data: string
   ): Promise<any>
 }

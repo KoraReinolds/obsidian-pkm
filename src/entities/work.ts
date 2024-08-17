@@ -1,28 +1,30 @@
 import {
   ELog,
   type TLinkLog,
-  type TSizeLog
+  type TStatusLog,
+  type TTimeLog
 } from '@/log/types'
 import { AEntity } from './entity'
 import type { ALog } from '@/log/model'
 
-export type TProductData = {
+export type TWorkData = {
   [ELog.link]: TLinkLog
-  [ELog.size]: TSizeLog
+  [ELog.status]: TStatusLog
+  [ELog.time_start]: TTimeLog
+  [ELog.time_end]: TTimeLog
 }
 
-export class Product extends AEntity {
+export class Work extends AEntity {
   logData: Map<ELog, string> = new Map()
-  token = `🍔`
+  token = `⚡`
   logStructure = {
     link: ELog.link,
-    size: ELog.size
+    status: ELog.status,
+    timeStart: ELog.time_start,
+    timeEnd: ELog.time_end
   }
-  folderPath = 'Food'
 
-  logWithParams(params: [string, number]): string {
-    return super.logWithParams(params)
-  }
+  folderPath = 'Tasks'
 
   async log(): Promise<string> {
     return super.log(this, 1)
@@ -31,14 +33,20 @@ export class Product extends AEntity {
   async parse(
     entity: AEntity,
     log: string
-  ): Promise<TProductData> {
+  ): Promise<TWorkData> {
     return await super.parse(this, log)
   }
 
   async parseLogs(
     entity: AEntity,
     logs: string[]
-  ): Promise<TProductData[]> {
+  ): Promise<TWorkData[]> {
     return await super.parseLogs(this, logs)
+  }
+
+  logWithParams(
+    params: [TTimeLog, number, string]
+  ): string {
+    return super.logWithParams(params)
   }
 }

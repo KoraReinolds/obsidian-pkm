@@ -168,3 +168,75 @@ const weeklyNote = async (app: TExtendedApp, dv: any) => {
 }
 
 export default weeklyNote
+
+// console.log(list, addedSizes, removedSizes)
+
+// products
+//   .sort((a, b) => a.name - b.name)
+//   .map((product) => {
+//     product.kkal = Math.round(
+//       ((9.3 * product.fats +
+//         4.1 * product.proteins +
+//         4.2 * product.carbohydrates) /
+//         100) *
+//         product.size *
+//         product.portion_size
+//     )
+//     return product
+//   })
+
+// const rows = []
+
+// for (const product of products) {
+//   product.fats = Math.round(
+//     (product.fats / 100) *
+//       product.size *
+//       product.portion_size
+//   )
+//   product.proteins = Math.round(
+//     (product.proteins / 100) *
+//       product.size *
+//       product.portion_size
+//   )
+//   product.carbohydrates = Math.round(
+//     (product.carbohydrates / 100) *
+//       product.size *
+//       product.portion_size
+//   )
+//   delete product.portion_size
+//   rows.push(Object.values(product))
+// }
+
+// let res = []
+// products.reduce((cur, next) => {
+//   Object.keys(next).forEach((key, index) => {
+//     cur[index] = (cur[index] || 0) + next[key]
+//   })
+//   return cur
+// }, res)
+
+// res = res.map((sum, i) => {
+//   if (i) return Math.round(sum / 7)
+//   else return 'Сумма'
+// })
+
+// rows.push(res)
+// const sum = res[1] + res[2] + res[3]
+// rows.push([
+//   '',
+//   Math.round((res[1] / sum) * 100),
+//   Math.round((res[2] / sum) * 100),
+//   Math.round((res[3] / sum) * 100)
+// ])
+
+// dv.table(
+//   [
+//     'Продукт',
+//     'Белки (г)',
+//     'Жиры (г)',
+//     'Углеводы (г)',
+//     'Порция (г)',
+//     'ккал'
+//   ],
+//   rows
+// )

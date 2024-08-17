@@ -1,7 +1,12 @@
+import type { IEntity } from '@/entities/types'
 import { ALog } from './model'
+import type { AEntity } from '@/entities/entity'
 
 export class SizeLog extends ALog {
-  async parse(data: string): Promise<number> {
+  async parse(
+    entity: AEntity,
+    data: string
+  ): Promise<number> {
     const sizeRegex = /#size\/(\d+)/
 
     const sizeMatch = data.match(sizeRegex)
