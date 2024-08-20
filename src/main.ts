@@ -9,7 +9,7 @@ import type { TExtendedApp } from './types'
 import { Shop, ShopAdd, ShopCancel } from './entities/shop'
 import type { IEntity } from './entities/types'
 import { ELog, type TTimeLog } from './log/types'
-import { TimeLog } from './log/time'
+import { EndTimeLog, TimeLog } from './log/time'
 import { SizeLog } from './log/size'
 import { LinkLog } from './log/link'
 import { Product } from './entities/product'
@@ -17,6 +17,7 @@ import weeklyNote from './notes/weekly'
 import { taskNote } from './notes/task'
 import { Work } from './entities/work'
 import { StatusLog } from './log/status'
+import type { AEntity } from './entities/entity'
 
 const patternNames: [string, string, number][] = [
   ['Абстрактная фабрика', 'Abstract factory', 1],
@@ -58,10 +59,10 @@ export default class PKMPlugin extends Plugin {
   shop = {
     instance: new Shop(this.extendedApp),
     getSizesFromLogs: async (
-      entity: IEntity,
+      entity: AEntity,
       logs: string[]
     ) => {
-      const logData = await entity.parseLogs(logs)
+      const logData = await entity.parseLogs(entity, logs)
 
       const sizes: Record<string, number> = {}
       logData.reduce((res, data) => {
@@ -194,8 +195,8 @@ export default class PKMPlugin extends Plugin {
 
   LogMap = {
     [ELog.time]: new TimeLog(this.extendedApp),
-    [ELog.time_start]: new TimeLog(this.extendedApp),
-    [ELog.time_end]: new TimeLog(this.extendedApp),
+    [ELog.timeStart]: new TimeLog(this.extendedApp),
+    [ELog.timeEnd]: new EndTimeLog(this.extendedApp),
     [ELog.size]: new SizeLog(this.extendedApp),
     [ELog.link]: new LinkLog(this.extendedApp),
     [ELog.status]: new StatusLog(this.extendedApp)
@@ -282,19 +283,21 @@ export default class PKMPlugin extends Plugin {
     return activeFile
   }
 
-  async getFileByPath(path: string): Promise<TFile> {
+  async getFileByPath(path: string): Promise<TFile | null> {
     const file = this.app.vault.getAbstractFileByPath(
       this.getFileName(path)
     )
     if (this.isFile(file)) return file
-    throw new Error('Get folder instead file')
+    return null
   }
 
-  async getFolderByPath(path: string): Promise<TFolder> {
+  async getFolderByPath(
+    path: string
+  ): Promise<TFolder | null> {
     const folder =
       this.app.vault.getAbstractFileByPath(path)
     if (this.isFolder(folder)) return folder
-    throw new Error('Get file instead folder')
+    return null
   }
 
   async suggestFileByPath(path: string): Promise<TFile> {

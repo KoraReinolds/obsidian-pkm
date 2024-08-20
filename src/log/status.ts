@@ -1,4 +1,3 @@
-import type { TFile } from 'obsidian'
 import { ALog } from './model'
 import type { AEntity } from '@/entities/entity'
 import { ELog } from './types'
@@ -7,21 +6,18 @@ export class StatusLog extends ALog {
   async parse(
     entity: AEntity,
     data: string
-  ): Promise<TFile> {
+  ): Promise<string> {
     if (!entity.folderPath)
       throw new Error(
-        'FolderPath not provided for display link'
+        'FolderPath not provided for display status'
       )
-    const linkRegex = /\[\[([^\]]+)\]\]/
-    const fileName = data.match(linkRegex)?.[0].slice(2, -2)
-    const linkMatch = data.match(linkRegex)
-    if (linkMatch) {
-      return await this.pkm.getFileByPath(
-        `${entity.folderPath}/${fileName}.md`
-      )
+    const statusRegex = /#status\/(\w+)/
+    const status = data.match(statusRegex)?.[1]
+    if (status) {
+      return status
     }
 
-    throw new Error("Can't parse link at " + data)
+    throw new Error("Can't parse status at " + data)
   }
 
   displayWithParams(params: string): string {
@@ -31,14 +27,15 @@ export class StatusLog extends ALog {
   async display(entity: AEntity): Promise<string> {
     if (!entity.folderPath)
       throw new Error(
-        'FolderPath not provided for display link'
+        'FolderPath not provided for display status'
       )
 
     const data = entity.logData.get(ELog.link)
+    const dataLogger = this.pkm.LogMap[ELog.link]
     if (!data)
-      throw new Error("Can't get link data from entity")
+      throw new Error("Can't get status data from entity")
 
-    const task = await this.parse(entity, data)
+    const task = await dataLogger.parse(entity, data)
 
     const cache = this.app.metadataCache.getFileCache(task)
 

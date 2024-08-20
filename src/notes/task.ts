@@ -1,29 +1,17 @@
 import type { TExtendedApp } from '@/types'
-import type { TFile } from 'obsidian'
+import type { TTimeLog } from '@/log/types'
 
 const taskNote = async (app: TExtendedApp, dv: any) => {
-  const regex =
-    /⚡ \[\[(.+?)\]\] (#status\/\S+)(( #time\/\S+)+)/
+  const pkm =
+    app.plugins?.plugins['obsidian-daily-first-pkm']
+  if (!pkm) throw new Error('Pkm plugin is required')
 
-  const files = dv
-    .pages('"Journal/Daily"')
-    .groupBy(({ file }: { file: TFile }) => file.name)
-
-  function calculateTimeDifference(tag1, tag2) {
-    function parseTag(tag) {
-      if (!tag) return { hours: 0, minutes: 0 }
-      const [hours, minutes] = tag
-        .split('/')
-        .slice(1)
-        .map(Number)
-      return { hours, minutes }
-    }
-
-    const time1 = parseTag(tag1)
-    const time2 = parseTag(tag2)
-
-    const totalMinutes1 = time1.hours * 60 + time1.minutes
-    const totalMinutes2 = time2.hours * 60 + time2.minutes
+  const calculateTimeDifference = (
+    time1: TTimeLog,
+    time2: TTimeLog
+  ) => {
+    const totalMinutes1 = time1.hh * 60 + time1.mm
+    const totalMinutes2 = time2.hh * 60 + time2.mm
 
     const difference = Math.abs(
       totalMinutes2 - totalMinutes1
@@ -32,43 +20,80 @@ const taskNote = async (app: TExtendedApp, dv: any) => {
     return difference
   }
 
-  function convertMinutesToHHMM(totalMinutes) {
+  const entity = pkm.work.instance
+
+  const logs = [...(await dv.pages('"Journal/Daily"'))]
+
+  const logData = (
+    await Promise.all(
+      logs
+        .filter((data) => !!data.log)
+        .map(async (data) => ({
+          name: data.file.name,
+          logs: await entity.parseLogs(
+            entity,
+            Array.isArray(data.log) ? data.log : [data.log]
+          )
+        }))
+    )
+  )
+    .map((data) => {
+      return data.logs.map((logData) => ({
+        ...logData,
+        name: data.name
+      }))
+    })
+    .flat()
+    .filter((data) => data.link)
+
+  const convertMinutesToHHMM = (totalMinutes: number) => {
     const hours = Math.floor(totalMinutes / 60)
     const minutes = totalMinutes % 60
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
   }
 
-  const fileName = dv.currentFilePath.split('/')[1]
-  const totalTime = 0
-  console.log(
-    files.map((file: any) => [
-      file.key,
-      [...file.rows.log].filter((t) => t[0] === `⚡`)
-      // .map((log) => log.match(regex).slice(1, 4))
-      // .filter(([name]) => name + '.md' === fileName)
-    ])
+  const file = await pkm.getActiveFile()
+
+  let totalTime = 0
+
+  Object.entries(
+    logData
+      .filter((data) => {
+        return data.link.basename === file.basename
+      })
+      .groupBy((data) => data.status)
+  ).forEach(([status, data]) => {
+    console.log(data)
+    const rows: any[] = []
+    dv.el('h2', status)
+    const timeStart = totalTime
+
+    data.forEach((item) => {
+      rows.push([
+        convertMinutesToHHMM(
+          item.timeStart.hh * 60 + item.timeStart.mm
+        ),
+        convertMinutesToHHMM(
+          item.timeEnd.hh * 60 + item.timeEnd.mm
+        ),
+        `[[${item.name}]]`
+      ])
+
+      totalTime += calculateTimeDifference(
+        item.timeStart,
+        item.timeEnd
+      )
+    })
+    dv.table(['time-start', 'time-end', 'day'], rows)
+    dv.el(
+      'h3',
+      `${status} time: ${convertMinutesToHHMM(totalTime - timeStart)}`
+    )
+  })
+  dv.el(
+    'h2',
+    `TOTAL time: ${convertMinutesToHHMM(totalTime)}`
   )
-  //   .filter(([name, logs]) => logs.length)
-  //   .forEach(([date, logs]) => {
-  //     const rows = []
-  //     dv.el('h2', date)
-  //     const timeStart = totalTime
-  //     logs.forEach(([_, status, time]) => {
-  //       let [tagStart, tagEnd] = time.split(' ').slice(1)
-  //       if (!tagEnd) tagEnd = tagStart
-  //       rows.push([status, tagStart, tagEnd])
-  //       totalTime += calculateTimeDifference(
-  //         tagStart,
-  //         tagEnd
-  //       )
-  //     })
-  //     dv.table(['status', 'time-start', 'time-end'], rows)
-  //     dv.el(
-  //       'h3',
-  //       convertMinutesToHHMM(totalTime - timeStart)
-  //     )
-  //   })
-  // dv.el('h2', convertMinutesToHHMM(totalTime))
 }
 
 export { taskNote }

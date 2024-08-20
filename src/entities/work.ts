@@ -10,8 +10,8 @@ import type { ALog } from '@/log/model'
 export type TWorkData = {
   [ELog.link]: TLinkLog
   [ELog.status]: TStatusLog
-  [ELog.time_start]: TTimeLog
-  [ELog.time_end]: TTimeLog
+  [ELog.timeStart]: TTimeLog
+  [ELog.timeEnd]: TTimeLog
 }
 
 export class Work extends AEntity {
@@ -20,8 +20,8 @@ export class Work extends AEntity {
   logStructure = {
     link: ELog.link,
     status: ELog.status,
-    timeStart: ELog.time_start,
-    timeEnd: ELog.time_end
+    timeStart: ELog.timeStart,
+    timeEnd: ELog.timeEnd
   }
 
   folderPath = 'Tasks'

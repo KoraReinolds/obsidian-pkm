@@ -34,6 +34,6 @@ export enum ELog {
   status = 'status',
   size = 'size',
   link = 'link',
-  time_start = 'time_start',
-  time_end = 'time_end'
+  timeStart = 'timeStart',
+  timeEnd = 'timeEnd'
 }

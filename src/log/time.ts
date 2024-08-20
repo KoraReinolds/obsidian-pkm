@@ -3,12 +3,13 @@ import type { TTimeLog } from './types'
 import type { AEntity } from '@/entities/entity'
 
 export class TimeLog extends ALog {
+  _timeRegex = /#time\/(\d{2})\/(\d{2})/
+
   async parse(
     entity: AEntity,
     data: string
   ): Promise<TTimeLog> {
-    const timeRegex = /#time\/(\d{2})\/(\d{2})/
-    const timeMatch = data.match(timeRegex)
+    const timeMatch = data.match(this._timeRegex)
     if (timeMatch)
       return {
         hh: parseInt(timeMatch[1]),
@@ -37,4 +38,8 @@ export class TimeLog extends ALog {
       config
     )
   }
+}
+
+export class EndTimeLog extends TimeLog {
+  _timeRegex = /#time\/(\d{2})\/(\d{2})(?!.*#time\/)/
 }
