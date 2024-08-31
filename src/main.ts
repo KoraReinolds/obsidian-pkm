@@ -1,5 +1,7 @@
 import {
   Editor,
+  Modal,
+  Notice,
   Plugin,
   TFile,
   TFolder,
@@ -390,5 +392,174 @@ export default class PKMPlugin extends Plugin {
         'templater-obsidian'
       ]
     this.tpm = this.tp.templater.current_functions_object
+
+    this.addCommand({
+      id: 'link-selected-text',
+      name: 'Link Selected Text to Note',
+      editorCallback: (editor) =>
+        this.showNoteNamePrompt(editor),
+      hotkeys: [
+        {
+          modifiers: ['Ctrl'],
+          key: 'k'
+        }
+      ]
+    })
+  }
+
+  showNoteNamePrompt(editor: Editor) {
+    const selectedText = editor.getSelection()
+    if (!selectedText) {
+      new Notice('No text selected!')
+      return
+    }
+
+    // Show a prompt to get the note name from the user
+    const promptModal = new AutocompleteModal(
+      this.app,
+      selectedText,
+      editor
+    )
+    promptModal.open()
+  }
+}
+
+class AutocompleteModal extends Modal {
+  private selectedText: string
+  private editor: Editor
+  private suggestions: string[]
+  private selectedIndex: number
+
+  constructor(
+    app: App,
+    selectedText: string,
+    editor: Editor
+  ) {
+    super(app)
+    this.selectedText = selectedText
+    this.editor = editor
+    this.suggestions = []
+    this.selectedIndex = -1
+  }
+
+  onOpen(): void {
+    const { contentEl } = this
+
+    contentEl.createEl('h2', { text: 'Enter note name' })
+
+    const inputEl = contentEl.createEl('input', {
+      type: 'text'
+    })
+    inputEl.focus()
+
+    const suggestionList = contentEl.createEl('ul', {
+      cls: 'suggestion-list'
+    })
+
+    inputEl.addEventListener('input', () => {
+      this.updateSuggestions(inputEl.value, suggestionList)
+    })
+
+    inputEl.addEventListener(
+      'keydown',
+      (event: KeyboardEvent) => {
+        switch (event.key) {
+          case 'ArrowDown':
+            this.navigateSuggestions(1, suggestionList)
+            break
+          case 'ArrowUp':
+            this.navigateSuggestions(-1, suggestionList)
+            break
+          case 'Enter':
+            event.preventDefault()
+            if (this.selectedIndex >= 0) {
+              this.createLink(
+                this.suggestions[this.selectedIndex]
+              )
+            } else {
+              const noteName = inputEl.value.trim()
+              if (noteName) {
+                this.createLink(noteName)
+              } else {
+                new Notice('Note name cannot be empty')
+              }
+            }
+            this.close()
+            break
+        }
+      }
+    )
+  }
+
+  private updateSuggestions(
+    query: string,
+    suggestionList: HTMLElement
+  ): void {
+    const notes = this.app.vault.getMarkdownFiles()
+    this.suggestions = notes
+      .filter((note) =>
+        note.basename
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      )
+      .map((note) => note.basename)
+
+    this.selectedIndex = -1 // Reset the selected index when the query changes
+
+    suggestionList.empty()
+
+    this.suggestions.forEach((suggestion, index) => {
+      const item = suggestionList.createEl('li', {
+        text: suggestion
+      })
+      item.addEventListener('click', () => {
+        this.createLink(suggestion)
+        this.close()
+      })
+      if (index === this.selectedIndex) {
+        item.addClass('selected')
+      }
+    })
+  }
+
+  private navigateSuggestions(
+    direction: number,
+    suggestionList: HTMLElement
+  ): void {
+    const items = suggestionList.children
+    if (items.length === 0) return
+
+    // Remove the selected class from the current item
+    if (this.selectedIndex >= 0) {
+      items[this.selectedIndex].removeClass('selected')
+    }
+
+    // Update the selected index
+    this.selectedIndex =
+      (this.selectedIndex + direction + items.length) %
+      items.length
+
+    // Add the selected class to the new item
+    items[this.selectedIndex].addClass('selected')
+  }
+
+  private createLink(noteName: string): void {
+    // Check if the note exists or needs to be created
+    const existingFile =
+      this.app.vault.getAbstractFileByPath(noteName + '.md')
+
+    if (!existingFile) {
+      // Create a new note if it doesn't exist
+      this.app.vault.create(noteName + '.md', '')
+    }
+
+    // Replace selected text with a markdown link
+    const linkText = `[[${noteName}|${this.selectedText}]]`
+    this.editor.replaceSelection(linkText)
+  }
+
+  onClose(): void {
+    const { contentEl } = this
+    contentEl.empty()
   }
 }

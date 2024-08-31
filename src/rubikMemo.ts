@@ -17,11 +17,9 @@ export const rubik = async (app: TExtendedApp) => {
       return
     }
 
-    const stateLinks = []
     const states = item[1]
     for await (const state of states) {
       const statePath = state.join(';')
-      stateLinks.push(statePath)
       const existingFile =
         await pkm?.getFileByPath(statePath)
       if (existingFile) {
@@ -33,18 +31,9 @@ export const rubik = async (app: TExtendedApp) => {
         links: [`[[${formulaPath}]]`]
       })}\n---`
       await app.vault.create(
-        `Memo/Rubik/${statePath}.md`,
+        `Memo/Rubik/${formulaPath}.md`,
         fileContent
       )
     }
-
-    const fileContent = `---\n${stringify({
-      tags: ['formula'],
-      links: stateLinks.map((link) => `[[${link}]]`)
-    })}\n---`
-    await app.vault.create(
-      `Memo/Rubik/${formulaPath}.md`,
-      fileContent
-    )
   }
 }
