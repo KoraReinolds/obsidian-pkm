@@ -11,7 +11,7 @@ import type { TExtendedApp } from './types'
 import { Shop, ShopAdd, ShopCancel } from './entities/shop'
 import type { IEntity } from './entities/types'
 import { ELog, type TTimeLog } from './log/types'
-import { EndTimeLog, TimeLog } from './log/time'
+import { TimeLog } from './log/time'
 import { SizeLog } from './log/size'
 import { LinkLog } from './log/link'
 import { Product } from './entities/product'
@@ -197,8 +197,6 @@ export default class PKMPlugin extends Plugin {
 
   LogMap = {
     [ELog.time]: new TimeLog(this.extendedApp),
-    [ELog.timeStart]: new TimeLog(this.extendedApp),
-    [ELog.timeEnd]: new EndTimeLog(this.extendedApp),
     [ELog.size]: new SizeLog(this.extendedApp),
     [ELog.link]: new LinkLog(this.extendedApp),
     [ELog.status]: new StatusLog(this.extendedApp)

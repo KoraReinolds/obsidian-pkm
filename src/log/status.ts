@@ -11,7 +11,7 @@ export class StatusLog extends ALog {
       throw new Error(
         'FolderPath not provided for display status'
       )
-    const statusRegex = /#status\/(\w+)/
+    const statusRegex = /\/status\/(\w+)/
     const status = data.match(statusRegex)?.[1]
     if (status) {
       return status
@@ -80,7 +80,7 @@ export class StatusLog extends ALog {
         showedStatuses
       )
 
-    const statusTag = `#status/${newStatus}`
+    const statusTag = `/status/${newStatus}`
 
     if (this.pkm.extendedApp.plugins) {
       const { update } =

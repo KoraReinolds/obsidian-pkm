@@ -27,7 +27,7 @@ export abstract class AEntity implements IEntity {
         return this.pkm.LogMap[type].displayWithParams(d)
       }
     )
-    const log = `${'>'.repeat(n * 2)} (log:: ${this.token} ${values.join(' ')})\n`
+    const log = `${'>'.repeat(n * 2)} - ${values.slice(0, 1).join(' ')} ${this.token} ${values.slice(1).join(' ')}\n`
     return log
   }
 
@@ -44,7 +44,7 @@ export abstract class AEntity implements IEntity {
       values.push(data)
       this.logData.set(type, data)
     }
-    const log = `${'>'.repeat(n * 2)} (log:: ${this.token} ${values.join(' ')})\n`
+    const log = `${'>'.repeat(n * 2)} - ${values.slice(0, 1).join(' ')} ${this.token} ${values.slice(1).join(' ')}\n`
     return log
   }
 
@@ -65,7 +65,7 @@ export abstract class AEntity implements IEntity {
 
   filterLogs(logs: string[]): string[] {
     return logs.filter((log) => {
-      const token = log.slice(0, log.indexOf(' '))
+      const token = log.split(' ')[4]
       return token === this.token
     })
   }

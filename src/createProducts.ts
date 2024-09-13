@@ -55,7 +55,7 @@ export default async () => {
     products
       .map(
         (p) =>
-          `>> (log:: 🛒 #time/10/22 #size/${p.size} [[${p.name}]]`
+          `>> (log:: 🛒 /time/10/22 /size/${p.size} [[${p.name}]]`
       )
       .join('\n')
   )

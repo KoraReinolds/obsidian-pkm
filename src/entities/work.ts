@@ -8,26 +8,26 @@ import { AEntity } from './entity'
 import type { ALog } from '@/log/model'
 
 export type TWorkData = {
+  [ELog.time]: TTimeLog
   [ELog.link]: TLinkLog
   [ELog.status]: TStatusLog
-  [ELog.timeStart]: TTimeLog
-  [ELog.timeEnd]: TTimeLog
 }
 
 export class Work extends AEntity {
   logData: Map<ELog, string> = new Map()
   token = `⚡`
   logStructure = {
+    time: ELog.time,
     link: ELog.link,
-    status: ELog.status,
-    timeStart: ELog.timeStart,
-    timeEnd: ELog.timeEnd
+    status: ELog.status
   }
 
   folderPath = 'Tasks'
 
   async log(): Promise<string> {
-    return super.log(this, 1)
+    const log = await super.log(this, 1)
+    console.log(123, await this.parse(this, log))
+    return log
   }
 
   async parse(
@@ -41,6 +41,7 @@ export class Work extends AEntity {
     entity: AEntity,
     logs: string[]
   ): Promise<TWorkData[]> {
+    // if (logs[0] && !logs[0].startsWith('(')) debugger
     return await super.parseLogs(this, logs)
   }
 

@@ -7,7 +7,7 @@ export class SizeLog extends ALog {
     entity: AEntity,
     data: string
   ): Promise<number> {
-    const sizeRegex = /#size\/(\d+)/
+    const sizeRegex = /\/size\/(\d+)/
 
     const sizeMatch = data.match(sizeRegex)
     if (sizeMatch) {
@@ -22,7 +22,7 @@ export class SizeLog extends ALog {
   }
 
   _createSize(n: string | number) {
-    return `#size/${n}`
+    return `/size/${n}`
   }
 
   async display(): Promise<string> {

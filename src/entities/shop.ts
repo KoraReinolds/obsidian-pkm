@@ -5,7 +5,6 @@ import {
   type TTimeLog
 } from '@/log/types'
 import { AEntity } from './entity'
-import type { ALog } from '@/log/model'
 
 export type TShopData = {
   [ELog.time]: TTimeLog

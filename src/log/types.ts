@@ -14,8 +14,14 @@ export interface ILog<T> {
 }
 
 export type TTimeLog = {
-  hh: number
-  mm: number
+  end: {
+    hh: number
+    mm: number
+  }
+  start: {
+    hh: number
+    mm: number
+  }
 }
 
 export type TSizeLog = number
@@ -30,10 +36,8 @@ export type TStatusLog =
   | 'done'
 
 export enum ELog {
-  time = 'time',
   status = 'status',
   size = 'size',
   link = 'link',
-  timeStart = 'timeStart',
-  timeEnd = 'timeEnd'
+  time = 'time'
 }
